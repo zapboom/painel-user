@@ -25,10 +25,10 @@ const GroupModal = ({
   state,
 }: GroupModalProps) => {
   const [group, setGroup] = useState<WhatssapBotGroup | null>();
-
+  const [closed, setClosed] = useState(false);
   useEffect(() => {
-    if (group && !showModal) handleSelectGroup(group);
-  }, [group, handleSelectGroup, showModal]);
+    if (group && !showModal && !closed) handleSelectGroup(group);
+  }, [closed, group, handleSelectGroup, showModal]);
 
   return (
     <>
@@ -43,7 +43,10 @@ const GroupModal = ({
                   <h3 className="text-3xl font-semibold">Selecionar grupo</h3>
                   <button
                     className="p-1 ml-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
-                    onClick={() => setModalState(false)}
+                    onClick={() => {
+                      setClosed(true);
+                      setModalState(false);
+                    }}
                   >
                     <span className="bg-transparent text-black opacity-5 h-6 w-6 text-2xl block outline-none focus:outline-none">
                       ×
@@ -57,10 +60,8 @@ const GroupModal = ({
                         setGroup(group_map);
                       }}
                       style={{
-                        fontSize:
-                          group === group_map ? "20px" : "inherit",
-                        color:
-                          group === group_map ? "black" : "inherit",
+                        fontSize: group === group_map ? "20px" : "inherit",
+                        color: group === group_map ? "black" : "inherit",
                       }}
                       key={idx}
                     >
@@ -72,7 +73,10 @@ const GroupModal = ({
                   <button
                     className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                     type="button"
-                    onClick={() => setModalState(false)}
+                    onClick={() => {
+                      setClosed(true);
+                      setModalState(false);
+                    }}
                   >
                     Fechar
                   </button>

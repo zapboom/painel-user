@@ -13,10 +13,11 @@ export default function CreateConnection({
   whatssap_connection_id,
 }: CreateConnectionProps) {
   const [qrCode, setQrCode] = useState<string>();
-  const [id, setId] = useState<string>(whatssap_connection_id!);
+  const [id, setId] = useState(whatssap_connection_id!);
   const { push } = useRouter();
   const createConnection = async () => {
     if (!token) return;
+    console.log("Criando sessão");
     const connectionService = new ConnectionService(token);
     const connectionCreated = await connectionService.createConnection();
     if (typeof connectionCreated == "string") {
@@ -35,14 +36,22 @@ export default function CreateConnection({
   };
 
   useEffect(() => {
-    if (token && !id) {
-      createConnection();
-    }
-    if (token && id) {
-      handleGetSessionById();
+    const makeAAction = async (token: string, id?: string) => {
+      if (token && id) {
+        await handleGetSessionById();
+        return;
+      }
+      if (token && !id) {
+        await createConnection();
+        return;
+      }
+    };
+
+    if (token) {
+      makeAAction(token, id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, id]);
 
   const connectionService = new ConnectionService(token);
   const handleGetSessionById = async () => {

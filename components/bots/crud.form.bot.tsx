@@ -2,7 +2,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { captalized } from "../../app/functions/captalized";
-import { Connection } from "@/app/services/interfaces";
+import { Connection, gameType, signalType } from "@/app/services/interfaces";
 import ConnectionService from "@/app/services/ConnectionService";
 import Toast from "awesome-toast-component";
 import BotService from "@/app/services/BotService";
@@ -10,8 +10,8 @@ import { useRouter } from "next/navigation";
 interface FormData {
   name: string;
   gales: number | null;
-  game_type: "DOUBLE";
-  signal_type: "NORMAL" | "VIP";
+  game_type: gameType;
+  signal_type: signalType;
   finish_messages: string | null;
   welcome_messages: string | null;
   bet_message: string | null;
@@ -23,7 +23,7 @@ interface FormData {
   minutes_late_entry: number | null;
   whatsappConnectionId: string | null;
 
-  whatssapConnections: Connection[];
+  whatssapConnections?: Connection[];
 }
 
 interface CrudFormBotProps {
@@ -32,7 +32,7 @@ interface CrudFormBotProps {
 }
 
 const CrudFormBot: React.FC<CrudFormBotProps> = ({ token, id }) => {
-  const [formData, setFormData] = useState<FormData>({
+  const defaultFormData: FormData = {
     name: "my-bot-name",
     finish_messages:
       "E por hoje é tudo pessoal![OTHER]Esperamos que tenham tirado bom proveito! e caso queira participar de sorteio de banca semanalmente preencha esseformulário[ESPACO][ESPACO]https://forms.gle/i394bsQRB3By8FEMA",
@@ -45,14 +45,69 @@ const CrudFormBot: React.FC<CrudFormBotProps> = ({ token, id }) => {
     finish_time: 300,
     minutes_late_entry: 2,
     game_type: "DOUBLE",
-    whatsappConnectionId: "6510f697d96ef5044eefe8b8",
+    whatsappConnectionId: "",
     welcome_messages:
       "Vamos começar![OTHER]A contagem regressiva para o início dos sinais está em andamento! 🕒📊",
     bet_message:
       "*FAÇA SUA APOSTA AS [TIME_2]!!*🦈✅🚀[ESPACO][ESPACO]APOSTAR NO *[CORM]*[ESPACO][ESPACO]🥇 FAZER ATÉ 3 ENTRADAS NO MINUTO!![ESPACO][ESPACO]OS SINAIS DO MEU ROBÔ SÓ SERVEM PRA PLATAFORMA ABAIXO OK?🦈✅LINK DE CADASTRO👇🏻📊📱[ESPACO][ESPACO]https://shre.ink/bugdodouble ",
-    whatssapConnections: [],
-  });
+  };
+  const [formData, setFormData] = useState<FormData>(defaultFormData);
+
+  useEffect(() => {
+    const getBotData = async (id: string) => {
+      const botService = new BotService(token);
+      const response = await botService.getBot(id);
+      console.log(response);
+      if (typeof response === "string") {
+        new Toast(response);
+        return;
+      }
+
+      const bot = response;
+
+      const connectionsService = new ConnectionService(token);
+
+      const connections = await connectionsService.getAllConnections();
+
+      if (typeof connections === "string") {
+        new Toast(connections);
+        return;
+      }
+
+      setFormData({
+        ...formData,
+        bet_message: bot.bet_message,
+        finish_messages: bot.finish_messages[0],
+        finish_time: bot.finish_time,
+        gales: bot.gales,
+        green_message: bot.green_message,
+        max_signal: bot.max_signal,
+        minutes_late_entry: bot.minutesLateEntry,
+        name: bot.name,
+        red_message: bot.red_message,
+        signal_interval: bot.signal_interval,
+        signal_type: bot.signalType,
+        whatssapConnections: connections,
+        game_type: bot.gameType,
+        welcome_messages: bot.welcome_messages[0],
+        whatsappConnectionId: bot.whatsappConnectionId,
+      });
+    };
+    if (id && token) {
+      getBotData(id);
+    }
+  }, [id, token]);
+
   const { push } = useRouter();
+  const handleDelete = async () => {
+    if (!id) return;
+    const botService = new BotService(token);
+
+    new Toast("Deletando bot");
+    await botService.deleteBot(id);
+    new Toast("Bot deletado com sucesso");
+    push("/");
+  };
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -66,12 +121,79 @@ const CrudFormBot: React.FC<CrudFormBotProps> = ({ token, id }) => {
     }));
   };
   console.log(formData);
+
+  const handleUpdateBot = async () => {
+    if (!token || !id) return;
+
+    const botService = new BotService(token);
+    const {
+      bet_message,
+      finish_messages,
+      finish_time,
+      gales,
+      game_type,
+      green_message,
+      max_signal,
+      minutes_late_entry,
+      name,
+      red_message,
+      signal_interval,
+      signal_type,
+      welcome_messages,
+      whatsappConnectionId,
+    } = formData;
+
+    if (
+      !bet_message ||
+      !finish_messages ||
+      !finish_time ||
+      !gales ||
+      !game_type ||
+      !green_message ||
+      !max_signal ||
+      !minutes_late_entry ||
+      !name ||
+      !red_message ||
+      !signal_interval ||
+      !signal_type ||
+      !welcome_messages ||
+      !whatsappConnectionId
+    ) {
+      return;
+    }
+
+    const response = await botService.updateBot(
+      {
+        bet_message: bet_message,
+        finish_messages: [finish_messages],
+        finish_time: Number(finish_time),
+        gales: Number(gales),
+        game_type: game_type,
+        green_message: green_message,
+        max_signal: Number(max_signal),
+        minutes_late_entry: Number(minutes_late_entry),
+        name: name,
+        red_message: red_message,
+        signal_interval: Number(signal_interval),
+        signal_type: signal_type,
+        welcome_messages: [welcome_messages],
+        whatsappConnectionId: whatsappConnectionId,
+      },
+      id
+    );
+
+    if (typeof response === "string") {
+      new Toast(response);
+      return;
+    }
+
+    window.location.reload();
+  };
+
   const handleCreateBot = async () => {
-    console.log("Token", token);
     if (!token) return;
 
     const botService = new BotService(token);
-    console.log("passei da criação do serviço do bot");
     const {
       bet_message,
       finish_messages,
@@ -112,7 +234,7 @@ const CrudFormBot: React.FC<CrudFormBotProps> = ({ token, id }) => {
       bet_message: bet_message,
       finish_messages: [finish_messages],
       finish_time: Number(finish_time),
-      gales: gales,
+      gales: Number(gales),
       game_type: game_type,
       green_message: green_message,
       max_signal: Number(max_signal),
@@ -154,16 +276,19 @@ const CrudFormBot: React.FC<CrudFormBotProps> = ({ token, id }) => {
     if (token) {
       getConnections();
     }
-  }, [token]);
+  }, [token, id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await handleCreateBot();
-    console.log(formData);
+    if (id) {
+      await handleUpdateBot();
+    } else {
+      await handleCreateBot();
+    }
   };
 
   const crudPhase = id ? "atualizar" : "criar";
-
+  console.log("Conexões do Whatssap:", formData.whatssapConnections);
   return (
     <section className="bg-white dark:bg-gray-900">
       <div className="max-w-2xl px-4 py-8 mx-auto lg:py-16">
@@ -251,13 +376,16 @@ const CrudFormBot: React.FC<CrudFormBotProps> = ({ token, id }) => {
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
               >
                 <option defaultChecked disabled></option>
-                {formData.whatssapConnections.length > 0 &&
+                {formData.whatssapConnections &&
+                  formData.whatssapConnections.length > 0 &&
                   formData.whatssapConnections.map((connection, index) => {
                     if (
                       !connection.connectionSessionData.status &&
                       connection.connectionSessionData.profileNumber
                     )
                       return null;
+
+                    console.log(`Conexão ${index}:`, connection);
                     return (
                       <option key={index} value={connection.id}>
                         {connection.connectionSessionData.profileNumber}
@@ -515,7 +643,8 @@ const CrudFormBot: React.FC<CrudFormBotProps> = ({ token, id }) => {
             {id && (
               <button
                 type="button"
-                className="text-red-600 inline-flex items-center hover:text-white border border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
+                onClick={handleDelete}
+                className="text-red-600 inline-flex items-center hover:text-danger border border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
               >
                 <svg
                   className="w-5 h-5 mr-1 -ml-1"

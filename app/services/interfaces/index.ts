@@ -54,11 +54,15 @@ export interface Entrie {
   time: string;
   botId: string;
 }
+
+export type signalType = "NORMAL" | "VIP";
+export type gameType = "DOUBLE";
+
 export interface Bot {
   id: string;
-  signalType: string;
+  signalType: signalType;
   name: string;
-  gameType: string;
+  gameType: gameType;
   finish_messages: string[];
   bet_message: string;
   gales: number;
@@ -151,3 +155,22 @@ export interface CreateBotRequest {
   minutes_late_entry: number;
   whatsappConnectionId: string;
 }
+
+
+export interface UpdateBotRequest {
+  game_type?: string;
+  name?: string;
+  signal_type?: string;
+  gales?: number;
+  finish_messages?: string[];
+  welcome_messages?: string[];
+  bet_message?: string;
+  green_message?: string;
+  red_message?: string;
+  max_signal?: number;
+  signal_interval?: number;
+  finish_time?: number;
+  minutes_late_entry?: number;
+  whatsappConnectionId?: string;
+}
+

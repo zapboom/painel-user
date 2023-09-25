@@ -2,6 +2,7 @@
 
 import { Bot } from "@/app/services/interfaces";
 import BotUnique from "./bot";
+import { useRouter } from "next/navigation";
 
 type BotsProps = {
   token: string;
@@ -10,6 +11,11 @@ type BotsProps = {
 
 export default function Bots({ token, bots }: BotsProps) {
   console.log(bots);
+  const { push } = useRouter();
+  const handleNewBot = () => {
+    push('/bots/create')
+  };
+
   return (
     <div className="mt-8 bg-white p-4 shadow rounded-lg">
       <h2 className="text-gray-500 text-lg font-semibold pb-4">Bots</h2>
@@ -44,7 +50,8 @@ export default function Bots({ token, bots }: BotsProps) {
             backgroundColor: "blue",
             width: "15rem",
           }}
-        //   onClick={goToCreateConnection}
+          onClick={handleNewBot}
+          //   onClick={goToCreateConnection}
           className="bg-blue-500 w-full mt-4 bg-blue-700  btn-blue text-white font-bold py-2 px-4 rounded"
         >
           Novo Bot

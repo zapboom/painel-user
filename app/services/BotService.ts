@@ -1,5 +1,10 @@
 import axios, { Axios } from "axios";
-import { Bot, CreateBotRequest, WhatssapBotGroup } from "./interfaces";
+import {
+  Bot,
+  CreateBotRequest,
+  UpdateBotRequest,
+  WhatssapBotGroup,
+} from "./interfaces";
 
 export default class BotService {
   axiosInstance: Axios;
@@ -22,6 +27,18 @@ export default class BotService {
       await this.axiosInstance.post("/bot", data);
     } catch (error) {
       return "Erro ao criar bot";
+    }
+  }
+
+  async updateBot(updateBotRequest: UpdateBotRequest, bot_id: string) {
+    try {
+      let data = JSON.stringify({
+        ...updateBotRequest,
+      });
+
+      await this.axiosInstance.patch(`/bot/${bot_id}`, data);
+    } catch (error) {
+      return "Erro ao atualizar bot";
     }
   }
 
@@ -66,6 +83,15 @@ export default class BotService {
       await this.axiosInstance.patch(`/bot/stop/${bot_id}`);
     } catch (error) {
       return `Erro ao parar bot, (desconecte a conexão em "aparelhos conectados"`;
+    }
+  }
+
+  async getBot(bot_id: string) {
+    try {
+      const response = await this.axiosInstance.get<Bot>(`/bot/${bot_id}`);
+      return response.data;
+    } catch (error) {
+      return "Erro ao buscar informações do bot";
     }
   }
 }
