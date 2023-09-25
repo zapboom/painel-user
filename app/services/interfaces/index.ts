@@ -156,7 +156,6 @@ export interface CreateBotRequest {
   whatsappConnectionId: string;
 }
 
-
 export interface UpdateBotRequest {
   game_type?: string;
   name?: string;
@@ -174,3 +173,8 @@ export interface UpdateBotRequest {
   whatsappConnectionId?: string;
 }
 
+export interface CreateStrategieDoubleRequest {
+  bot_id: string;
+  bet_color: number;
+  preset_colors: number[];
+}

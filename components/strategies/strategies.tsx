@@ -1,7 +1,11 @@
 import BotService from "@/app/services/BotService";
-import { Bot } from "@/app/services/interfaces";
+import EntrieService from "@/app/services/EntrieService";
+import StrategieService from "@/app/services/StrategieService";
+import { Bot, Strategie } from "@/app/services/interfaces";
 import Toast from "awesome-toast-component";
 import { useState, useEffect } from "react";
+import StrategieUnique from "./strategie";
+import CreateStrategieModal from "./modal/create-strategie.modal";
 type StrategiesProps = {
   token: string;
 };
@@ -13,6 +17,7 @@ type StrategiesState = {
 type StrategiesMutateState = {
   bot_id?: string;
   bot?: Bot;
+  strategies?: Strategie[];
 };
 
 export default function Strategies({ token }: StrategiesProps) {
@@ -20,7 +25,7 @@ export default function Strategies({ token }: StrategiesProps) {
     bots: [],
   });
   const [mutateState, setMutateState] = useState<StrategiesMutateState>({});
-
+  console.log(mutateState);
   useEffect(() => {
     const getBots = async (token: string) => {
       const botService = new BotService(token);
@@ -32,15 +37,37 @@ export default function Strategies({ token }: StrategiesProps) {
         return;
       }
 
-      setState({
+      setState((prev) => ({
+        ...prev,
         bots,
-      });
+      }));
+    };
+
+    const getStrategies = async (token: string, bot_id: string) => {
+      const strategiesService = new StrategieService(token);
+
+      const strategies = await strategiesService.listStrategiesBot(bot_id);
+      console.log(strategies);
+      if (typeof strategies === "string") {
+        new Toast(strategies);
+        return;
+      }
+
+      setMutateState((prev) => ({
+        ...prev,
+        strategies,
+      }));
     };
 
     if (token) {
       getBots(token);
     }
-  }, [token]);
+    if (token) {
+      if (mutateState.bot_id) {
+        getStrategies(token, mutateState.bot_id);
+      }
+    }
+  }, [mutateState.bot_id, token]);
 
   console.log(mutateState);
   const handleChange = (
@@ -50,11 +77,10 @@ export default function Strategies({ token }: StrategiesProps) {
   ) => {
     const { name, value } = e.target;
     console.log(value, name);
-
+    console.log(name);
     if (name === "bot_id") {
-      const indexBot = state.bots.findIndex(
-        (bot) => bot.id === mutateState.bot_id
-      );
+      const indexBot = state.bots.findIndex((bot) => bot.id === value);
+      console.log(name, indexBot);
       setMutateState((prev) => ({
         ...prev,
         bot: state.bots[indexBot],
@@ -77,7 +103,7 @@ export default function Strategies({ token }: StrategiesProps) {
         htmlFor="bot_id"
         className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
       >
-        Select an option
+        Selecione um Bot
       </label>
       <select
         id="bot_id"
@@ -98,10 +124,10 @@ export default function Strategies({ token }: StrategiesProps) {
           })}
       </select>
 
-      {mutateState.bot && (
+      {mutateState.bot && mutateState.bot.gameType === "DOUBLE" && (
         <table className="w-full table-auto text-sm">
           <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light">
-            Estratégia Visada
+            Estratégia
           </th>
           <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light">
             Cor alvo
@@ -109,7 +135,23 @@ export default function Strategies({ token }: StrategiesProps) {
           <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light">
             Ações
           </th>
+
+          <tbody>
+            {mutateState.strategies &&
+              mutateState.strategies.length > 0 &&
+              mutateState.strategies.map((strategie, index) => (
+                <StrategieUnique
+                  strategie={strategie}
+                  key={index}
+                  token={token}
+                />
+              ))}
+          </tbody>
         </table>
+      )}
+
+      {mutateState.bot && token && (
+        <CreateStrategieModal token={token} bot_id={mutateState.bot.id} />
       )}
     </div>
   );
