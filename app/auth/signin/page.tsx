@@ -51,17 +51,17 @@ const SignIn: React.FC = () => {
               <Link className="mb-5.5 inline-block" href="/">
                 <Image
                   className="hidden dark:block"
-                  src={"/images/logo/logo.png"}
+                  src={"/images/logo/logo-extended.png"}
                   alt="Logo"
                   width={176}
-                  height={32}
+                  height={64}
                 />
                 <Image
                   className="dark:hidden"
-                  src={"/images/logo/logo.png"}
+                  src={"/images/logo/logo-extended.png"}
                   alt="Logo"
                   width={176}
-                  height={32}
+                  height={64}
                 />
               </Link>
 

@@ -16,8 +16,7 @@ export default class UserServices {
     console.log(`Credentias`, credentials);
     try {
       let data = JSON.stringify({
-        email: credentials.email,
-        password: credentials.password,
+        ...credentials,
       });
       const response = await this.axiosInstance.post<LoginResponse>(
         "/auth/email/login",

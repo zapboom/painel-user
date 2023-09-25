@@ -6,10 +6,14 @@ import { useEffect, useState } from "react";
 
 type CreateConnectionProps = {
   token: string;
+  whatssap_connection_id?: string;
 };
-export default function CreateConnection({ token }: CreateConnectionProps) {
+export default function CreateConnection({
+  token,
+  whatssap_connection_id,
+}: CreateConnectionProps) {
   const [qrCode, setQrCode] = useState<string>();
-  const [id, setId] = useState<string>();
+  const [id, setId] = useState<string>(whatssap_connection_id!);
   const { push } = useRouter();
   const createConnection = async () => {
     if (!token) return;
@@ -29,9 +33,13 @@ export default function CreateConnection({ token }: CreateConnectionProps) {
       setQrCode(formatedQrCode);
     }
   };
+
   useEffect(() => {
-    if (token) {
+    if (token && !id) {
       createConnection();
+    }
+    if (token && id) {
+      handleGetSessionById();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
@@ -47,8 +55,31 @@ export default function CreateConnection({ token }: CreateConnectionProps) {
     if (typeof connectionGeted === "string") {
       return new Toast(connectionGeted);
     }
+    if (connectionGeted.session) {
+      if (
+        connectionGeted.session.qrcode &&
+        connectionGeted.session.status === "qrcode"
+      ) {
+        const formatedQrCode = connectionGeted.session.qrcode.replace(
+          "data:image/png;base64,",
+          ""
+        );
+        setQrCode(formatedQrCode);
+        return new Toast("Escaneie o QRcode antes de prosseguir");
+      }
+    }
 
     if (connectionGeted.status_session.status !== "CONNECTED") {
+      if (
+        connectionGeted.session.qrcode &&
+        connectionGeted.session.status === "qrcode"
+      ) {
+        const formatedQrCode = connectionGeted.session.qrcode.replace(
+          "data:image/png;base64,",
+          ""
+        );
+        setQrCode(formatedQrCode);
+      }
       return new Toast("Escaneie o QRcode antes de prosseguir");
     }
 
@@ -87,7 +118,7 @@ export default function CreateConnection({ token }: CreateConnectionProps) {
               onClick={handleGetSessionById}
               className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded"
             >
-              Escanei
+              Escaneei
             </button>
           </div>
         </div>

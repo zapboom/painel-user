@@ -66,12 +66,20 @@ export interface Bot {
   red_message: string;
   welcome_messages: string[];
   target_group: string;
+  strategies: Strategie[];
   finish_time: number;
   signal_interval: number;
   in_use: boolean;
   minutesLateEntry: number;
   max_signal: number;
   whatsappConnectionId: string;
+}
+
+export interface Strategie {
+  id: string;
+  preset_colors: number[];
+  bet_color: number;
+  botId: string;
 }
 
 export interface connectionSessionData {
@@ -110,9 +118,36 @@ export interface GetConnectionResponse {
   connection: Connection;
   profile: WhatssapProfile;
   status_session: Session;
+  session: Session;
 }
 
 export interface CreateConnectionResponse {
   connection: Connection;
   session: Session;
+}
+
+export interface WhatssapBotGroup {
+  id: {
+    server: string;
+    user: string;
+    _serialized: string;
+  };
+  subject: string;
+}
+
+export interface CreateBotRequest {
+  game_type: string;
+  name: string;
+  signal_type: string;
+  gales: number;
+  finish_messages: string[];
+  welcome_messages: string[];
+  bet_message: string;
+  green_message: string;
+  red_message: string;
+  max_signal: number;
+  signal_interval: number;
+  finish_time: number;
+  minutes_late_entry: number;
+  whatsappConnectionId: string;
 }
