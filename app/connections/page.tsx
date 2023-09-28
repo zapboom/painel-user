@@ -7,11 +7,6 @@ import { Connection } from "../services/interfaces";
 import ConnectionService from "../services/ConnectionService";
 import Toast from "awesome-toast-component";
 
-export const metadata: Metadata = {
-  title: "Connections Page | Zap Boom",
-  description: "This is the connections page for Zap Boom",
-};
-
 interface ConnectionsPageState {
   connections: Connection[];
 }

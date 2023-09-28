@@ -8,11 +8,6 @@ import { Metadata } from "next";
 import { useForm, SubmitHandler } from "react-hook-form";
 import useAuth from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
-export const metadata: Metadata = {
-  title: "Signin Page | Zap Boom",
-  description: "Login in Zap Boom",
-  // other metadata
-};
 
 const SignIn: React.FC = () => {
   const { register, handleSubmit } = useForm();
