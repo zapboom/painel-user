@@ -50,6 +50,7 @@ export default function BotUnique({ bot, token }: BotProps) {
       );
       if (typeof response === "string") {
         new Toast(response);
+        window.location.reload()
         return;
       }
       new Toast("Bot iniciado");
