@@ -237,7 +237,7 @@ const SignIn: React.FC = () => {
                     <input
                       {...register("password")}
                       type="password"
-                      placeholder="6+ Characters, 1 Capital letter"
+                      placeholder="Os 6 primeiros digitos do CPF que utilizou na hora da compra"
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     />
 
