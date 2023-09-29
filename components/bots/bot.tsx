@@ -21,6 +21,7 @@ export default function BotUnique({ bot, token }: BotProps) {
     showModal: false,
     selectedGroup: null,
   });
+  const [hasStartedBot, setHasStartedBot] = useState(false);
   const { push } = useRouter();
   const handleSelectGroup = (group: WhatssapBotGroup) => {
     setState({
@@ -50,16 +51,17 @@ export default function BotUnique({ bot, token }: BotProps) {
       );
       if (typeof response === "string") {
         new Toast(response);
-        window.location.reload()
+        window.location.reload();
         return;
       }
       new Toast("Bot iniciado");
       window.location.reload();
     };
-    if (state.selectedGroup) {
+    if (state.selectedGroup && !hasStartedBot) {
       handleStartBot();
+      setHasStartedBot(true);
     }
-  }, [bot, bot.id, bot.name, state, state.selectedGroup, token]);
+  }, [bot, bot.id, bot.name, hasStartedBot, state, state.selectedGroup, token]);
 
   const handleGetGroups = async () => {
     if (!token) return;
